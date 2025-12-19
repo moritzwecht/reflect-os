@@ -5,8 +5,8 @@ import path from 'path';
 import { kv } from '@vercel/kv';
 
 const DB_PATH = path.join(process.cwd(), 'settings.json');
-// Only use KV if we are in production AND have a URL, otherwise fallback to local for safety.
-const USE_KV = !!process.env.KV_URL;
+// Only use KV/Redis if we have a URL, otherwise fallback to local for safety.
+const USE_STORAGE = !!(process.env.KV_URL || process.env.REDIS_URL || process.env.KV_REST_API_URL);
 
 export interface Settings {
     showWeather: boolean;
@@ -38,7 +38,7 @@ async function ensureLocalDB() {
 }
 
 export async function getSettings(): Promise<Settings> {
-    if (USE_KV) {
+    if (USE_STORAGE) {
         try {
             const settings = await kv.get<Settings>('mirror-settings');
             return settings || defaultSettings;
@@ -64,7 +64,7 @@ export async function updateSettings(newSettings: Partial<Settings>) {
         const current = await getSettings();
         const updated = { ...current, ...newSettings };
 
-        if (USE_KV) {
+        if (USE_STORAGE) {
             await kv.set('mirror-settings', updated);
         } else {
             await fs.writeFile(DB_PATH, JSON.stringify(updated, null, 2));
