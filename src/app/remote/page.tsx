@@ -42,7 +42,7 @@ export default function Remote() {
             padding: '2rem',
             fontFamily: 'sans-serif'
         }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem' }}>Mirror Remote 🎛️</h1>
+            <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem' }}>Mirror Remote</h1>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 

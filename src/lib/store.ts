@@ -5,8 +5,11 @@ import path from 'path';
 import { kv } from '@vercel/kv';
 
 const DB_PATH = path.join(process.cwd(), 'settings.json');
-// Only use KV/Redis if we have a URL, otherwise fallback to local for safety.
-const USE_STORAGE = !!(process.env.KV_URL || process.env.REDIS_URL || process.env.KV_REST_API_URL);
+
+// Vercel KV needs KV_REST_API_URL and KV_REST_API_TOKEN.
+// If the user only has REDIS_URL, they might have the wrong integration.
+const HAS_KV_VARS = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+const USE_STORAGE = HAS_KV_VARS || !!process.env.KV_URL;
 
 export interface Settings {
     showWeather: boolean;
@@ -30,9 +33,12 @@ async function ensureLocalDB() {
         await fs.access(DB_PATH);
     } catch {
         try {
-            await fs.writeFile(DB_PATH, JSON.stringify(defaultSettings, null, 2));
+            // Only write if we are NOT on Vercel (or in /tmp)
+            if (process.env.NODE_ENV !== 'production') {
+                await fs.writeFile(DB_PATH, JSON.stringify(defaultSettings, null, 2));
+            }
         } catch (e) {
-            console.error("Local DB Create Error (Expected on Vercel):", e);
+            // Silence FS errors on Vercel
         }
     }
 }
@@ -43,7 +49,8 @@ export async function getSettings(): Promise<Settings> {
             const settings = await kv.get<Settings>('mirror-settings');
             return settings || defaultSettings;
         } catch (e) {
-            console.error("Vercel KV Read Error (Check connection):", e);
+            console.error("Vercel KV Error:", e);
+            // Fallback to defaults to prevent 500
             return defaultSettings;
         }
     }
@@ -54,7 +61,7 @@ export async function getSettings(): Promise<Settings> {
         const data = await fs.readFile(DB_PATH, 'utf-8');
         return JSON.parse(data);
     } catch (e) {
-        console.error("Local Read Error:", e);
+        // If file doesn't exist or we can't read it, just return defaults
         return defaultSettings;
     }
 }
@@ -67,12 +74,14 @@ export async function updateSettings(newSettings: Partial<Settings>) {
         if (USE_STORAGE) {
             await kv.set('mirror-settings', updated);
         } else {
+            // Local file write
             await fs.writeFile(DB_PATH, JSON.stringify(updated, null, 2));
         }
 
         return updated;
     } catch (e) {
-        console.error("Update Error:", e);
+        console.error("Storage Update Error:", e);
+        // Return whatever we have to keep UI functioning
         return defaultSettings;
     }
 }
