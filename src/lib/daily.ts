@@ -1,5 +1,3 @@
-"use server";
-
 export interface DailySong {
     title: string;
     artist: string;

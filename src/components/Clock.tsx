@@ -3,15 +3,18 @@
 import { useState, useEffect } from "react";
 
 export default function Clock() {
-    const [time, setTime] = useState(new Date());
+    const [time, setTime] = useState<Date | null>(null);
 
     useEffect(() => {
+        setTime(new Date()); // Set initial time on client
         const timer = setInterval(() => {
             setTime(new Date());
         }, 1000);
 
         return () => clearInterval(timer);
     }, []);
+
+    if (!time) return null; // Render nothing or a placeholder until time is set on client
 
     const timeString = time.toLocaleTimeString("de-DE", {
         hour: "2-digit",

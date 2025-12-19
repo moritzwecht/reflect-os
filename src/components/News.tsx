@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getNews, NewsItem } from "../lib/news";
+import { getNewsAction } from "../lib/actions";
+import { NewsItem } from "../lib/news";
 import { Newspaper } from "lucide-react";
 
 export default function News() {
@@ -10,7 +11,7 @@ export default function News() {
 
     useEffect(() => {
         async function load() {
-            const data = await getNews();
+            const data = await getNewsAction();
             setNews(data);
         }
 

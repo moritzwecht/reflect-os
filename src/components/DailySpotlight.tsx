@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DailySong, getDailySong } from "../lib/daily";
+import { DailySong } from "../lib/daily";
+import { getDailySongAction } from "../lib/actions";
 import { Music2 } from "lucide-react";
 
 export default function DailySpotlight() {
@@ -9,7 +10,7 @@ export default function DailySpotlight() {
 
     useEffect(() => {
         async function load() {
-            const data = await getDailySong();
+            const data = await getDailySongAction();
             setSong(data);
         }
         load();

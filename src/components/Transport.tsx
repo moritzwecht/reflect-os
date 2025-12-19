@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Departure, getDepartures } from "../lib/transport";
-import { Bus, Train } from "lucide-react";
+import { getDeparturesAction } from "../lib/actions";
+import { Departure } from "../lib/transport";
+import { Loader2 } from "lucide-react";
 
 export default function Transport() {
     const [departures, setDepartures] = useState<Departure[]>([]);
 
     useEffect(() => {
         async function load() {
-            const data = await getDepartures();
+            const data = await getDeparturesAction();
             setDepartures(data);
         }
 

@@ -1,5 +1,3 @@
-"use server";
-
 import Parser from 'rss-parser';
 
 export interface NewsItem {

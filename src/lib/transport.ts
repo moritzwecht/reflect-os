@@ -1,5 +1,3 @@
-"use server";
-
 import { createClient } from 'hafas-client';
 import { profile as nahshProfile } from 'hafas-client/p/nahsh/index.js';
 

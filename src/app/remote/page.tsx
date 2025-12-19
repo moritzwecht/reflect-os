@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSettings, updateSettings, Settings } from "../../lib/store";
+import { getSettings, updateSettings } from "../../lib/actions";
+import { Settings } from "../../lib/store";
 import { Send, Trash2 } from "lucide-react";
 
 export default function Remote() {
