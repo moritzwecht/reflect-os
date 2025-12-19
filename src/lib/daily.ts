@@ -457,15 +457,19 @@ const songs: DailySong[] = [
 ];
 
 export async function getDailySong(): Promise<DailySong> {
-    // Use the day of the year to pick a stable song for 24h
     const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = (now.getTime() - start.getTime()) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
 
-    // Use modulo in case list size changes, but mostly to map 1..365 to 0..364
-    // dayOfYear is 1-based (Jan 1st = 1).
-    const index = (dayOfYear - 1) % songs.length;
-    return songs[index >= 0 ? index : 0];
+    // Create a unique integer seed for the day: YYYYMMDD (e.g., 20251219)
+    // This ensures the song stays the same for 24h but changes drastically the next day.
+    const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+
+    // Simple pseudo-random number generator (Mulberry32-style) to mix it up
+    // This avoids "Song 1" always following "Song 2".
+    let t = seed + 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    const randomFloat = ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+
+    const index = Math.floor(randomFloat * songs.length);
+    return songs[index];
 }
